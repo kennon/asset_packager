@@ -3,7 +3,7 @@ module Synthesis
 
     # class variables
     @@asset_packages_yml = $asset_packages_yml || 
-      (File.exists?("#{RAILS_ROOT}/config/asset_packages.yml") ? YAML.load_file("#{RAILS_ROOT}/config/asset_packages.yml") : nil)
+      (File.exists?("#{RAILS_ROOT}/config/asset_packages.yml") ? YAML.load_file("#{RAILS_ROOT}/config/asset_packages.yml") : {})
   
     # singleton methods
     class << self
@@ -25,7 +25,7 @@ module Synthesis
       end
 
       def find_by_target(asset_type, target)
-        package_hash = @@asset_packages_yml[asset_type].find {|p| p.keys.first == target }
+        package_hash = @@asset_packages_yml[asset_type].find {|p| p.keys.first == target } unless @@asset_packages_yml[asset_type].nil?
         package_hash ? self.new(asset_type, package_hash) : nil
       end
 
@@ -34,7 +34,7 @@ module Synthesis
         package_hash = @@asset_packages_yml[asset_type].find do |p|
           key = p.keys.first
           p[key].include?(path_parts[2]) && (parse_path(key)[1] == path_parts[1])
-        end
+        end unless @@asset_packages_yml[asset_type].nil?
         package_hash ? self.new(asset_type, package_hash) : nil
       end
 
