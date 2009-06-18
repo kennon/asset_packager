@@ -3,8 +3,11 @@ module Synthesis
 
     # class variables
     @@asset_packages_yml = $asset_packages_yml || 
-      (File.exists?("#{RAILS_ROOT}/config/asset_packages.yml") ? YAML.load_file("#{RAILS_ROOT}/config/asset_packages.yml") : {})
+      (File.exists?("#{RAILS_ROOT}/config/asset_packages.yml") ? YAML.load_file("#{RAILS_ROOT}/config/asset_packages.yml") : nil)
   
+    @@asset_packager_asset_hosts_yml = $asset_packager_asset_hosts_yml || 
+      (File.exists?("#{RAILS_ROOT}/config/asset_packager_asset_hosts.yml") ? YAML.load_file("#{RAILS_ROOT}/config/asset_packager_asset_hosts.yml") : nil)
+
     # singleton methods
     class << self
       
@@ -27,6 +30,10 @@ module Synthesis
       def find_by_target(asset_type, target)
         package_hash = @@asset_packages_yml[asset_type].find {|p| p.keys.first == target } unless @@asset_packages_yml[asset_type].nil?
         package_hash ? self.new(asset_type, package_hash) : nil
+      end
+
+      def find_asset_host
+        @@asset_packager_asset_hosts_yml[rand(@@asset_packager_asset_hosts_yml.size)]
       end
 
       def find_by_source(asset_type, source)
@@ -182,6 +189,10 @@ module Synthesis
         source.gsub!(/\n$/, "")            # remove last break
         source.gsub!(/ \{ /, " {")         # trim inside brackets
         source.gsub!(/; \}/, "}")          # trim inside brackets
+
+        # add asset_host to url() assets
+        source.gsub!(/url\(([^)]+)\)/) {"url('#{self.class.find_asset_host}#{$1.gsub(/('|")/,'')}')"} unless @@asset_packager_asset_hosts_yml.nil?
+        
         source
       end
 

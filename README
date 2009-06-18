@@ -2,6 +2,15 @@
 
 JavaScript and CSS Asset Compression for Production Rails Apps
 
+== Fork Information
+
+This fork adds url() asset_host substitution in stylesheets. If you have
+a file in config called asset_packager_asset_hosts.yml that contains
+a yml array of asset hosts, a random item in the array will be added to
+each url() in your stylesheet.
+
+I don't have any tests or anything yet, so use at your own risk.
+
 == Description
 
 When it comes time to deploy your new web application, instead of 
